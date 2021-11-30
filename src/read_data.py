@@ -8,14 +8,18 @@ class Data:
     def __init__(self, batch_size, file):
         self.batch_size = batch_size
         self.file = file
+        with open(self.file, 'r') as fp:
+            self.data_dict = json.load(fp)
+
 
     def clean(self, s):
         res = re.sub(r'[^\w\s]', '', s)
         return res
 
+    def get_data_dict(self):
+        return self.data_dict
+
     def load(self):
-        with open(self.file, 'r') as fp:
-            self.data_dict = json.load(fp)
         if DEBUG:
             print(self.data_dict.keys())
         questions_len = len(self.data_dict.keys())

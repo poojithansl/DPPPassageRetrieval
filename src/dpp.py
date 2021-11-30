@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import argparse
-DEBUG = 1
+DEBUG = 0
 
 class DPP:
     def __init__(self, input, batch_size):
@@ -17,7 +17,7 @@ class DPP:
     def runDPP(self, max_samples):
         for matrix_l in self.Lagrangian.compute_matrix():
             result = self.compute(matrix_l, max_samples)
-        return
+            yield(result)
 
     def compute(self, matrix_l, max_samples):
         if DEBUG:
