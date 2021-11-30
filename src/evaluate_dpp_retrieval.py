@@ -29,7 +29,7 @@ import numpy as np
 
 import regex
 from dpp import DPP
-
+DEBUG = 1
 
 logger = logging.getLogger(__name__)
 
@@ -246,7 +246,6 @@ def evaluate_retrieval(input, batch_size, topk, multi_answer=True, regex=False):
     dataReader = dpp.Lagrangian.dataReader
 
     tokenizer = SimpleTokenizer()
-    # retrieval = json.load(open(retrieval_file))
     data_dict = dataReader.get_data_dict()
 
     accuracy = { topk : [] }
@@ -269,7 +268,6 @@ def evaluate_retrieval(input, batch_size, topk, multi_answer=True, regex=False):
                     if present_answer_id != -1:
                         present_answers[present_answer_id] = 1
                 else:
-                    breakpoint()
                     if 'has_answer' in ctx:
                         if ctx['has_answer']:
                             has_ans= True
@@ -277,6 +275,8 @@ def evaluate_retrieval(input, batch_size, topk, multi_answer=True, regex=False):
                     if has_ans:
                         break
             if multi_answer:
+                # if n <= k, all n should be in topK
+                # else if n > k, all k passages should be having an answer
                 if len(answers) <= topk:
                     acc = all(present_answers)
                 else:
@@ -287,7 +287,8 @@ def evaluate_retrieval(input, batch_size, topk, multi_answer=True, regex=False):
                 # For single answer just any of the answers need to be present
                 acc = has_ans==True
             accuracy[topk].append(acc)
-        print(np.sum(accuracy[topk]), count)
+        if DEBUG:
+            print(np.sum(accuracy[topk]), count)
     print(f'Top{topk}\taccuracy: {np.mean(accuracy[topk])}')
     print(f'Number of samples right: {np.sum(accuracy[topk])}')
     print(f'Number of samples: {len(accuracy[topk])}')
