@@ -19,8 +19,7 @@ class LagrangianMatrix:
             if DEBUG:
                 print(len(passages_list)) # batch size
                 print(len(passages_list[0])) # 100
-            ltensor = torch.empty(self.batch_size, len(passages_list[0]), len(passages_list[0]))
-
+            ltensorList = []
             for ix in range(len(passages_list)):
                 passages = passages_list[ix]
                 query = query_list[ix]
@@ -32,9 +31,13 @@ class LagrangianMatrix:
                 # Similarity
                 sim_passage_encoding = self.Sim_model.encode(passages, convert_to_tensor=True)
                 simMatrix = util.pytorch_cos_sim(sim_passage_encoding, sim_passage_encoding)
-
+                # L matrix
                 lmatrix = torch.mul(qualityMatrix, simMatrix)
-                torch.cat((ltensor, torch.unsqueeze(lmatrix, 0)), dim=0)
+                ltensorList.append(lmatrix)
+                if DEBUG:
+                    if torch.isnan(torch.min(lmatrix)):
+                        breakpoint()
+
             #simTensor is batch_size * 100 * 100
             if DEBUG:
                 print(qualityMatrix.size())
@@ -43,6 +46,7 @@ class LagrangianMatrix:
                 print(scores.size())
                 print(simMatrix.size())
                 print(sim_passage_encoding.size())
+            ltensor = torch.stack(ltensorList)
             yield(ltensor)
 
 

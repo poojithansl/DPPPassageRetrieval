@@ -16,15 +16,12 @@ class DPP:
 
     def runDPP(self, max_samples):
         for matrix_l in self.Lagrangian.compute_matrix():
-            if DEBUG:
-                print(matrix_l.size())
             result = self.compute(matrix_l, max_samples)
-            if DEBUG:
-                print(result)
-            # break
         return
 
     def compute(self, matrix_l, max_samples):
+        if DEBUG:
+            print(matrix_l.shape)
         with torch.no_grad():
             count = 1 # counts of chosen elements
             N = matrix_l.size()[1] # counts of elements
@@ -74,9 +71,20 @@ class DPP:
                 D = D - d_minus # apply changements after iteration
                 J = torch.argmax(torch.log(D * mask), dim=1)  # select max elements based on modified D excluding chosen elements
                 mask = mask.scatter_(1, J.view(-1, 1), 0.0) # mask chosen elements
+                if DEBUG:
+                    print(mask.shape)
+                    print("Count:" + str(count))
                 count += 1
 
-            return torch.nonzero(1 - mask)[:, 1].view(B, -1)
+            res = torch.nonzero(1 - mask)[:, 1].view(B, -1)
+            if DEBUG:
+                print(res.shape)
+            if list(res.shape) != [B, max_samples]:
+                nanpresent = False
+                if torch.isnan(torch.min(matrix_l)):
+                    nanpresent = True
+                breakpoint()
+            return res
 
 
 def run(input, batch_size, topk):
