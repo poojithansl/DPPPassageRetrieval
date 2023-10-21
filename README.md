@@ -1,5 +1,9 @@
 # DPPPassageRetrieval
 
+
+
+Retrieve diverse passages using Determinantal Point processes
+
 python dpp.py --input "input json file" 
 
 
